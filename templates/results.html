@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+<body>
+    <h1>Quiz Result</h1>
+    
+    <p>Your score: {{ score }}%</p>
+    <p>Correct answers: {{ correct_answers }}</p>
+    <p>Incorrect answers: {{ total_questions - correct_answers }}</p>
+
+    <h2>Answers:</h2>
+    <ul>
+        {% for question, answer, user_answer in zip(questions, correct_answers, user_answers) %}
+            <li>
+                <strong>{{ question }}</strong><br>
+                Correct answer: {{ answer }}<br>
+                Your answer: {{ user_answer }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <a href="/">Back to Home</a>
+</body>
+</html>

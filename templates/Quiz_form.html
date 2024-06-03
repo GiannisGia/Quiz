@@ -1,0 +1,13 @@
+<form action="C:\Users\johng\OneDrive\Υπολογιστής\Quiz/Question2.py" method="post">
+    {% for i, question in enumerate(questions) %}
+        <div>
+            <p>{{ question }}</p>
+            {% for option in options[i] %}
+                <label>
+                    <input type="radio" name="question_{{ i+1 }}" value="{{ option[0] }}"> {{ option }}
+                </label>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <button type="submit">Submit Quiz</button>
+</form>

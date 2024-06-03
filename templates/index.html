@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-image: url('/static/Backround.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin: 50;
+            padding: 0;
+            height: 100vh;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%; 
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+    
+        /* Content inside the pop-up */
+        .popup-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1 style="color: red;">Καλώς ήρθατε στον Εκατομμυριούχο: Greek Edition</h1>
+        <button id="startButton" type="button" onclick="startgame()">Έναρξη Παιχνίδιου</button><br><br>
+        <button id="rules" type="button" onclick="rules()">Κανόνες</button><br><br>
+        <button id="exit" type="button" onclick="exit()">Έξοδος</button><br>
+    </center>
+ 
+    <div id="exitPopup" class="popup">
+        <div class="popup-content">
+            <h2>Θέλεις σίγουρα να βγείς απο την εφαρμόγη;</h2>
+            <button onclick="confirmExit()">Ναι</button>
+            <button onclick="closeExitPopup()">Όχι</button>
+        </div>
+    </div>
+    <script>
+        function startgame() {
+            window.location.href = "/start_game.html";
+        }
+
+        function rules() {
+            window.location.href = "/rules.html";
+        }
+
+        function exit() {
+            document.getElementById("exitPopup").style.display = "block";
+        }
+
+        function closeExitPopup() {
+            document.getElementById("exitPopup").style.display = "none";
+        }
+
+        function confirmExit() {
+            closeExitPopup();
+            location.reload();
+        }
+    </script>
+</body>
+</html>

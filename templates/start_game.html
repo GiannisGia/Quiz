@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: goldenrod;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+            background-color: black;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .option-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .option {
+            margin: 10px;
+            background-color: blue;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        input[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+        .question-number {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: red;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+        .correct-answer {
+            background-color: green !important;
+        }
+        .wrong-answer {
+            background-color: red !important;
+        }
+        .selected-answer {
+            background-color: orange !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="question-number">Ερώτηση <span id="question-number">{{ question_number }}</span></div>
+        <form id="quizForm" method="post">
+            <h2 style="color: white;" id="question">{{ question }}</h2>
+            <div class="options-container" id="options-container">
+                {% for option in options %}
+                {% if loop.index0 % 2 == 0 %}
+                <div class="option-row">
+                {% endif %}
+                    <div class="option" id="option{{ loop.index }}">
+                        <input type="radio" id="{{ option }}" name="answer" value="{{ option }}" onchange="changeColor(this)">
+                        <label for="{{ option }}" style="color: white;">{{ option }}</label>
+                    </div>
+                {% if loop.index0 % 2 == 1 %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <input type="hidden" name="question" value="{{ question }}">
+            <input type="hidden" name="question_number" value="{{ question_number }}">
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+        function changeColor(selectedOption) {
+            var options = document.getElementsByClassName('option');
+            for (var i = 0; i < options.length; i++) {
+                options[i].classList.remove('selected-answer');
+            }
+            selectedOption.parentNode.classList.add('selected-answer');
+        }
+
+    document.getElementById('quizForm').onsubmit = function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    var formData = new FormData(this);
+    var questionNumber = formData.get('question_number');
+    var selectedAnswer = formData.get('answer');
+
+    if (!selectedAnswer) {
+        alert('Παρακαλώ επιλέξτε μια απάντηση.');
+        return; // Stop execution if no answer is selected
+    }
+
+    fetch('/check_answer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            question_number: questionNumber,
+            answer: selectedAnswer
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.is_correct) {
+            alert('Σωστό! Κέρδισες ' + data.reward + '€.');
+
+            if (data.winner) {
+                // Redirect to the winner page
+                window.location.href = "/winner.html";
+            } else {
+                // Move to next question
+                fetchNextQuestion(data.question_number);
+            }
+        } else {
+            alert('Λάθος! Η σωστή απάντηση είναι: ' + data.correct_answer);
+            window.location.href = "/"; // Redirect to index.html
+        }
+    })
+    .catch(error => console.error('Error:', error));
+};
+
+function fetchNextQuestion(questionNumber) {
+    fetch('/next_question', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            question_number: questionNumber
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update the question and options
+        document.getElementById('question').innerText = data.question;
+        document.getElementById('question-number').innerText = data.question_number;
+
+        var optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        data.options.forEach((option, index) => {
+            if (index % 2 === 0) {
+                var optionRow = document.createElement('div');
+                optionRow.classList.add('option-row');
+                optionsContainer.appendChild(optionRow);
+            }
+            var optionDiv = document.createElement('div');
+            optionDiv.classList.add('option');
+            optionDiv.id = 'option' + (index + 1);
+            var input = document.createElement('input');
+            input.type = 'radio';
+            input.id = option;
+            input.name = 'answer';
+            input.value = option;
+            input.onchange = function() { changeColor(this); };
+            var label = document.createElement('label');
+            label.htmlFor = option;
+            label.style.color = 'white';
+            label.innerText = option;
+            optionDiv.appendChild(input);
+            optionDiv.appendChild(label);
+            optionsContainer.lastChild.appendChild(optionDiv);
+        });
+
+        document.querySelector('input[name="question"]').value = data.question;
+        document.querySelector('input[name="question_number"]').value = data.question_number;
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+</body>
+</html>
